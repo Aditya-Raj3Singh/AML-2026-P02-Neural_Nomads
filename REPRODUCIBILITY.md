@@ -4,7 +4,9 @@
 
 **AML-2026-P02-Neural_Nomads — Next-Day Air Quality for an Indian City**
 
-This guide describes how to reproduce the work currently completed in **Phase A, Phase B (Checkpoint 1), and Phase C**.
+This guide describes how to reproduce the work completed in **Phase A, Phase B (Checkpoint 1), and Phase C**.
+
+---
 
 ## 1. Environment Setup
 
@@ -16,7 +18,7 @@ From the repository root, install the required packages:
 pip install -r requirements.txt
 ```
 
-The current project uses:
+The project uses:
 
 - pandas
 - numpy
@@ -25,7 +27,9 @@ The current project uses:
 - scikit-learn
 - Jupyter Notebook
 
-> Note: Phase A was developed in Google Colab and contains some Colab-specific setup/download cells. When running locally, use the repository data paths instead of the Colab-specific path where necessary.
+> Note: Phase A was developed in Google Colab and contains some Colab-specific setup/download cells. When running locally, use the repository data paths instead of the Colab-specific paths where necessary.
+
+---
 
 ## 2. Data
 
@@ -43,7 +47,7 @@ Phase A selects **Delhi** and creates the processed daily dataset:
 delhi_daily_reindexed.csv
 ```
 
-For reliable reproduction, the recommended data structure is:
+The recommended data structure is:
 
 ```text
 DATA/
@@ -53,7 +57,9 @@ DATA/
     └── delhi_daily_reindexed.csv
 ```
 
-The later notebooks use the processed Delhi dataset produced during Phase A.
+The processed Delhi dataset is used by the later phases of the project.
+
+---
 
 ## 3. Phase A — EDA and Data Preparation
 
@@ -72,9 +78,9 @@ Phase A performs the following work:
 5. Examines overall and year-wise missingness.
 6. Examines PM2.5 availability.
 7. Produces exploratory plots, including:
-   - missingness heatmap
+   - Missingness heatmap
    - PM2.5 over time
-   - monthly PM2.5 distribution
+   - Monthly PM2.5 distribution
 8. Creates the processed Delhi daily dataset used by later phases.
 
 The processed Delhi dataset covers:
@@ -98,18 +104,14 @@ results/phase-a/missingness_observed_rows.csv
 results/phase-a/missing_data_policy.md
 ```
 
-and the processed dataset:
-
-```text
-DATA/processed/delhi_daily_reindexed.csv
-```
+---
 
 ## 4. Phase B — Checkpoint 1
 
-After Phase A has produced `delhi_daily_reindexed.csv`, run:
+After Phase A has produced the processed Delhi dataset, run:
 
 ```text
-notebooks/02-checkpoint1.ipynb
+notebooks/02-preprocessing.ipynb
 ```
 
 Phase B Checkpoint 1 performs:
@@ -138,6 +140,8 @@ The evaluated test period is:
 
 The same test dates are used when comparing the persistence baseline and Linear Regression.
 
+---
+
 ## 5. Phase B Outputs
 
 The Checkpoint 1 results are:
@@ -147,84 +151,111 @@ The Checkpoint 1 results are:
 | Persistence | 19.158 | 28.002 | 0.705 |
 | Linear Regression | 18.444 | 25.451 | 0.756 |
 
-The generated result files are:
+The generated result files are stored under:
 
 ```text
-results/phase-b/checkpoint1_metrics.csv
-results/phase-b/checkpoint1_predictions.csv
+results/phase-b/
 ```
 
-`checkpoint1_predictions.csv` contains the actual next-day PM2.5 values together with the persistence and Linear Regression predictions for the held-out test dates.
+The Phase B results provide the baseline and initial Linear Regression performance used for comparison with later modelling work.
+
+---
 
 ## 6. Phase C — Feature Engineering and Regression Models
 
-After completing Phase B, Phase C extends the next-day PM2.5 prediction pipeline with additional feature engineering and regression modelling.
+Phase C extends the next-day PM2.5 prediction pipeline with additional feature engineering and regression modelling.
 
 Run the Phase C notebooks in the following order:
 
 ```text
 1. notebooks/phase_c/02-feature-engineering.ipynb
-2. notebooks/phase_c/03-regression-models.ipynb
+2. notebooks/phase_c/03_regression_models.ipynb
 ```
 
 ### Phase C Feature Engineering
 
-The feature-engineering notebook prepares the regression-ready dataset used for the Phase C modelling experiments.
-
-The generated feature dataset is stored as:
-
-```text
-results/phase_c/delhi_regression_features.csv
-```
-
-This dataset is then used by the regression-model notebook.
-
-### Phase C Regression Modelling
-
 Run:
 
 ```text
-notebooks/phase_c/03-regression-models.ipynb
+notebooks/phase_c/02-feature-engineering.ipynb
 ```
 
-The notebook performs the Phase C regression experiments and generates model evaluation outputs, predictions, coefficients, baseline comparisons, and visualisations.
+This notebook prepares the regression-ready feature dataset used by the Phase C modelling experiments.
+
+The generated feature dataset is:
+
+```text
+results/phase-c/delhi_regression_features.csv
+```
+
+### Phase C Regression Modelling
+
+After feature engineering, run:
+
+```text
+notebooks/phase_c/03_regression_models.ipynb
+```
+
+This notebook performs the Phase C regression modelling experiments and generates model comparisons, predictions, coefficients, baseline comparisons, and evaluation figures.
+
+---
+
+## 7. Phase C Outputs
 
 The Phase C outputs are stored under:
 
 ```text
-results/phase_c/
+results/phase-c/
 ```
 
-Important generated files include:
+The current Phase C result structure is:
 
 ```text
-results/phase_c/PHASE_C_SUMMARY.md
-results/phase_c/delhi_regression_features.csv
-results/phase_c/regression_model_comparison.csv
-results/phase_c/regression_predictions.csv
-results/phase_c/regression_coefficients.csv
-results/phase_c/regression_baseline_improvement.csv
+results/phase-c/
+├── figures/
+├── PHASE_C_SUMMARY.md
+├── delhi_regression_features.csv
+├── regression_baseline_improvement.csv
+├── regression_coefficients.csv
+├── regression_model_comparison.csv
+└── regression_predictions.csv
 ```
 
-Phase C figures are stored under:
+### Output Description
 
-```text
-results/phase_c/figures/
-```
+**`PHASE_C_SUMMARY.md`**
 
-including:
+Contains a summary of the Phase C modelling work and results.
 
-```text
-results/phase_c/figures/actual_vs_predicted_next_day_pm25.png
-results/phase_c/figures/ridge_actual_vs_predicted.png
-results/phase_c/figures/ridge_residuals_over_time.png
-```
+**`delhi_regression_features.csv`**
 
-The `PHASE_C_SUMMARY.md` file provides a summary of the Phase C modelling work and results.
+Contains the regression-ready features generated during Phase C feature engineering.
 
-## 7. Leakage Prevention
+**`regression_baseline_improvement.csv`**
 
-The project uses a time-ordered split rather than a random train/test split.
+Contains the comparison of regression performance against the baseline.
+
+**`regression_coefficients.csv`**
+
+Contains regression-model coefficient information.
+
+**`regression_model_comparison.csv`**
+
+Contains the evaluation results used to compare the regression models.
+
+**`regression_predictions.csv`**
+
+Contains actual and predicted next-day PM2.5 values used for model evaluation.
+
+**`figures/`**
+
+Contains the visual evaluation outputs generated during Phase C.
+
+---
+
+## 8. Leakage Prevention
+
+The project uses a **time-ordered split** rather than a random train/test split.
 
 For missing predictor values, the Phase B Linear Regression pipeline uses:
 
@@ -236,37 +267,43 @@ inside the scikit-learn pipeline.
 
 This ensures that imputation statistics are learned from the training data during model fitting rather than from the complete dataset.
 
-Lag features are created using previous/current observations only. Future values must never be used as predictors for a next-day target.
+Lag features are created using previous/current observations only.
 
-The same time-series principle must be maintained during Phase C feature engineering and regression modelling.
+Future values must never be used as predictors for a next-day target.
 
-## 8. Recommended Execution Order
+The same time-series principle is maintained during Phase C feature engineering and regression modelling.
 
-Run the complete project in this order:
+---
+
+## 9. Recommended Execution Order
+
+Run the complete project in the following order:
 
 ```text
 1. Install requirements
         ↓
 2. notebooks/01-eda.ipynb
         ↓
-3. Verify/create DATA/processed/delhi_daily_reindexed.csv
+3. Verify the processed Delhi dataset
         ↓
-4. notebooks/02-checkpoint1.ipynb
+4. notebooks/02-preprocessing.ipynb
         ↓
-5. Verify Phase B checkpoint results
+5. Verify Phase B results
         ↓
 6. notebooks/phase_c/02-feature-engineering.ipynb
         ↓
-7. Verify results/phase_c/delhi_regression_features.csv
+7. Verify results/phase-c/delhi_regression_features.csv
         ↓
-8. notebooks/phase_c/03-regression-models.ipynb
+8. notebooks/phase_c/03_regression_models.ipynb
         ↓
 9. Verify Phase C model comparison and prediction files
         ↓
-10. Verify Phase C figures
+10. Verify results/phase-c/figures/
 ```
 
-## 9. Expected Phase B Checkpoint 1 Results
+---
+
+## 10. Expected Phase B Checkpoint 1 Results
 
 A successful reproduction of Phase B should produce results close to:
 
@@ -284,12 +321,14 @@ R²   ≈ 0.756
 
 Small differences may occur if the dataset, preprocessing steps, package versions, or notebook code are changed.
 
-## 10. Phase C Output Verification
+---
+
+## 11. Phase C Output Verification
 
 After running the Phase C notebooks, verify that the following files have been generated successfully:
 
 ```text
-results/phase_c/
+results/phase-c/
 ├── PHASE_C_SUMMARY.md
 ├── delhi_regression_features.csv
 ├── regression_baseline_improvement.csv
@@ -297,59 +336,88 @@ results/phase_c/
 ├── regression_model_comparison.csv
 ├── regression_predictions.csv
 └── figures/
-    ├── actual_vs_predicted_next_day_pm25.png
-    ├── ridge_actual_vs_predicted.png
-    └── ridge_residuals_over_time.png
 ```
 
-These outputs provide the regression-ready feature dataset, model comparison results, predictions, coefficients, comparison against the baseline, and visual evaluation of the Phase C regression models.
+These outputs provide:
 
-## 11. Repository Structure
+- Regression-ready feature data
+- Regression model comparisons
+- Test-period predictions
+- Regression coefficients
+- Baseline-improvement analysis
+- Visual evaluation of the regression models
 
-After completing Phase C, the relevant project structure should be:
+---
+
+## 12. Repository Structure
+
+After completing Phase C, the relevant repository structure is:
 
 ```text
 AML-2026-P02-Neural_Nomads/
 │
 ├── DATA/
 │   ├── raw/
-│   │   └── city_day.csv
 │   └── processed/
-│       └── delhi_daily_reindexed.csv
 │
 ├── notebooks/
 │   ├── 01-eda.ipynb
-│   ├── 02-checkpoint1.ipynb
+│   ├── 02-preprocessing.ipynb
+│   ├── NOTEBOOK DESCR
+│   │
 │   └── phase_c/
 │       ├── 02-feature-engineering.ipynb
-│       └── 03-regression-models.ipynb
+│       └── 03_regression_models.ipynb
 │
 ├── results/
 │   ├── figures/
+│   ├── metrics/
 │   ├── phase-a/
 │   ├── phase-b/
-│   └── phase_c/
+│   │
+│   └── phase-c/
+│       ├── figures/
 │       ├── PHASE_C_SUMMARY.md
 │       ├── delhi_regression_features.csv
 │       ├── regression_baseline_improvement.csv
 │       ├── regression_coefficients.csv
 │       ├── regression_model_comparison.csv
-│       ├── regression_predictions.csv
-│       └── figures/
-│           ├── actual_vs_predicted_next_day_pm25.png
-│           ├── ridge_actual_vs_predicted.png
-│           └── ridge_residuals_over_time.png
+│       └── regression_predictions.csv
 │
 ├── src/
+│
 ├── .gitignore
 ├── README.md
 ├── REPRODUCIBILITY.md
 └── requirements.txt
 ```
 
-## 12. Current Scope
+---
 
-This reproducibility guide covers the project work currently completed through:
+## 13. Requirements
+
+The current `requirements.txt` contains:
+
+```text
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+jupyter
+```
+
+Install all dependencies using:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 14. Current Scope
+
+This reproducibility guide covers the work currently completed through:
 
 - **Phase A — EDA and Data Preparation**
 - **Phase B — Checkpoint 1**
@@ -359,6 +427,6 @@ Phase A establishes the cleaned and processed Delhi air-quality dataset.
 
 Phase B establishes the next-day PM2.5 prediction target, persistence baseline, chronological evaluation procedure, and initial Linear Regression model.
 
-Phase C extends this work with additional feature engineering and regression modelling, along with model comparisons, predictions, coefficient analysis, baseline-improvement analysis, and regression visualisations.
+Phase C extends this work with additional feature engineering and regression modelling, including model comparisons, predictions, coefficient analysis, baseline-improvement analysis, and regression visualisations.
 
-Later project stages, including tasks not yet implemented in the current repository, should be documented here as they are completed.
+Future project stages should be added to this reproducibility guide as they are completed.
