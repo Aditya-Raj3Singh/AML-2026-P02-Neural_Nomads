@@ -4,8 +4,7 @@
 
 **AML-2026-P02-Neural_Nomads — Next-Day Air Quality for an Indian City**
 
-This guide describes how to reproduce the work currently completed in
-**Phase A** and **Phase B (Checkpoint 1)**.
+This guide describes how to reproduce the work currently completed in **Phase A, Phase B (Checkpoint 1), and Phase C**.
 
 ## 1. Environment Setup
 
@@ -13,7 +12,7 @@ Python 3.9 or newer is recommended.
 
 From the repository root, install the required packages:
 
-``` bash
+```bash
 pip install -r requirements.txt
 ```
 
@@ -26,16 +25,13 @@ The current project uses:
 - scikit-learn
 - Jupyter Notebook
 
-> Note: Phase A was developed in Google Colab and contains some
-> Colab-specific setup/download cells. When running locally, use the
-> repository data paths instead of the Colab-specific path where
-> necessary.
+> Note: Phase A was developed in Google Colab and contains some Colab-specific setup/download cells. When running locally, use the repository data paths instead of the Colab-specific path where necessary.
 
 ## 2. Data
 
 The original dataset used by the project is:
 
-``` text
+```text
 city_day.csv
 ```
 
@@ -43,52 +39,47 @@ It contains daily air-quality observations for multiple Indian cities.
 
 Phase A selects **Delhi** and creates the processed daily dataset:
 
-``` text
+```text
 delhi_daily_reindexed.csv
 ```
 
-In the current repository, the data folders have non-standard names such
-as `DATA[`, `RAW[`, and `processed [`. For reliable reproduction, it is
-recommended to rename them to:
+For reliable reproduction, the recommended data structure is:
 
-``` text
-data/
+```text
+DATA/
 ├── raw/
 │   └── city_day.csv
 └── processed/
     └── delhi_daily_reindexed.csv
 ```
 
-The Phase B notebook searches for the processed dataset using standard
-`data/processed/...` paths, so normalizing these folder names is
-recommended before reproducing the pipeline locally.
+The later notebooks use the processed Delhi dataset produced during Phase A.
 
 ## 3. Phase A — EDA and Data Preparation
 
 Run:
 
-``` text
+```text
 notebooks/01-eda.ipynb
 ```
 
 Phase A performs the following work:
 
-1.  Loads the original `city_day.csv` dataset.
-2.  Parses and checks the date column.
-3.  Selects Delhi as the target city.
-4.  Checks invalid dates, missing city values, and duplicate city-date
-    records.
-5.  Examines overall and year-wise missingness.
-6.  Examines PM2.5 availability.
-7.  Produces exploratory plots, including:
-    - missingness heatmap
-    - PM2.5 over time
-    - monthly PM2.5 distribution
-8.  Creates the processed Delhi daily dataset used by later phases.
+1. Loads the original `city_day.csv` dataset.
+2. Parses and checks the date column.
+3. Selects Delhi as the target city.
+4. Checks invalid dates, missing city values, and duplicate city-date records.
+5. Examines overall and year-wise missingness.
+6. Examines PM2.5 availability.
+7. Produces exploratory plots, including:
+   - missingness heatmap
+   - PM2.5 over time
+   - monthly PM2.5 distribution
+8. Creates the processed Delhi daily dataset used by later phases.
 
 The processed Delhi dataset covers:
 
-``` text
+```text
 2015-01-01 to 2020-07-01
 ```
 
@@ -96,7 +87,7 @@ with 2009 daily rows.
 
 Important Phase A outputs include:
 
-``` text
+```text
 results/figures/missingness_heatmap.png
 results/figures/pm25_over_time.png
 results/figures/pm25_monthly_distribution.png
@@ -109,109 +100,177 @@ results/phase-a/missing_data_policy.md
 
 and the processed dataset:
 
-``` text
-data/processed/delhi_daily_reindexed.csv
+```text
+DATA/processed/delhi_daily_reindexed.csv
 ```
 
 ## 4. Phase B — Checkpoint 1
 
 After Phase A has produced `delhi_daily_reindexed.csv`, run:
 
-``` text
+```text
 notebooks/02-checkpoint1.ipynb
 ```
 
 Phase B Checkpoint 1 performs:
 
-1.  Loading of the processed Delhi dataset.
-2.  Creation of the next-day PM2.5 target: `PM2.5_target_t_plus_1`.
-3.  A chronological train/test split.
-4.  A persistence baseline where today’s PM2.5 is used as the prediction
-    for tomorrow.
-5.  Initial lag-based feature engineering.
-6.  A manual lag/leakage sanity check.
-7.  Median imputation inside the scikit-learn pipeline.
-8.  Linear Regression training.
-9.  Evaluation using MAE, RMSE, and R².
+1. Loading of the processed Delhi dataset.
+2. Creation of the next-day PM2.5 target: `PM2.5_target_t_plus_1`.
+3. A chronological train/test split.
+4. A persistence baseline where today's PM2.5 is used as the prediction for tomorrow.
+5. Initial lag-based feature engineering.
+6. A manual lag/leakage sanity check.
+7. Median imputation inside the scikit-learn pipeline.
+8. Linear Regression training.
+9. Evaluation using MAE, RMSE, and R².
 10. Comparison of Linear Regression against the persistence baseline.
 11. Export of metrics and test-period predictions.
 
-### Chronological split
+### Chronological Split
 
-The model uses observations before 2020 for training and 2020 as the
-held-out test period.
+The model uses observations before 2020 for training and 2020 as the held-out test period.
 
 The evaluated test period is:
 
-``` text
+```text
 2020-01-01 to 2020-06-30
 ```
 
-The same test dates are used when comparing the persistence baseline and
-Linear Regression.
+The same test dates are used when comparing the persistence baseline and Linear Regression.
 
 ## 5. Phase B Outputs
 
-The current Checkpoint 1 results are:
+The Checkpoint 1 results are:
 
-| Model             |    MAE |   RMSE |    R² |
-|-------------------|-------:|-------:|------:|
-| Persistence       | 19.158 | 28.002 | 0.705 |
+| Model | MAE | RMSE | R² |
+|---|---:|---:|---:|
+| Persistence | 19.158 | 28.002 | 0.705 |
 | Linear Regression | 18.444 | 25.451 | 0.756 |
 
 The generated result files are:
 
-``` text
+```text
 results/phase-b/checkpoint1_metrics.csv
 results/phase-b/checkpoint1_predictions.csv
 ```
 
-`checkpoint1_predictions.csv` contains the actual next-day PM2.5 values
-together with the persistence and Linear Regression predictions for the
-held-out test dates.
+`checkpoint1_predictions.csv` contains the actual next-day PM2.5 values together with the persistence and Linear Regression predictions for the held-out test dates.
 
-## 6. Leakage Prevention
+## 6. Phase C — Feature Engineering and Regression Models
 
-The project uses a time-ordered split rather than a random train/test
-split.
+After completing Phase B, Phase C extends the next-day PM2.5 prediction pipeline with additional feature engineering and regression modelling.
 
-For missing predictor values, the Phase B Linear Regression pipeline
-uses:
+Run the Phase C notebooks in the following order:
 
-``` text
+```text
+1. notebooks/phase_c/02-feature-engineering.ipynb
+2. notebooks/phase_c/03-regression-models.ipynb
+```
+
+### Phase C Feature Engineering
+
+The feature-engineering notebook prepares the regression-ready dataset used for the Phase C modelling experiments.
+
+The generated feature dataset is stored as:
+
+```text
+results/phase_c/delhi_regression_features.csv
+```
+
+This dataset is then used by the regression-model notebook.
+
+### Phase C Regression Modelling
+
+Run:
+
+```text
+notebooks/phase_c/03-regression-models.ipynb
+```
+
+The notebook performs the Phase C regression experiments and generates model evaluation outputs, predictions, coefficients, baseline comparisons, and visualisations.
+
+The Phase C outputs are stored under:
+
+```text
+results/phase_c/
+```
+
+Important generated files include:
+
+```text
+results/phase_c/PHASE_C_SUMMARY.md
+results/phase_c/delhi_regression_features.csv
+results/phase_c/regression_model_comparison.csv
+results/phase_c/regression_predictions.csv
+results/phase_c/regression_coefficients.csv
+results/phase_c/regression_baseline_improvement.csv
+```
+
+Phase C figures are stored under:
+
+```text
+results/phase_c/figures/
+```
+
+including:
+
+```text
+results/phase_c/figures/actual_vs_predicted_next_day_pm25.png
+results/phase_c/figures/ridge_actual_vs_predicted.png
+results/phase_c/figures/ridge_residuals_over_time.png
+```
+
+The `PHASE_C_SUMMARY.md` file provides a summary of the Phase C modelling work and results.
+
+## 7. Leakage Prevention
+
+The project uses a time-ordered split rather than a random train/test split.
+
+For missing predictor values, the Phase B Linear Regression pipeline uses:
+
+```text
 SimpleImputer(strategy="median")
 ```
 
-inside the scikit-learn pipeline. This ensures that imputation
-statistics are learned from the training data during model fitting
-rather than from the complete dataset.
+inside the scikit-learn pipeline.
 
-Lag features are created using previous/current observations only;
-future values must never be used as predictors for a next-day target.
+This ensures that imputation statistics are learned from the training data during model fitting rather than from the complete dataset.
 
-## 7. Recommended Execution Order
+Lag features are created using previous/current observations only. Future values must never be used as predictors for a next-day target.
 
-Run the project in this order:
+The same time-series principle must be maintained during Phase C feature engineering and regression modelling.
 
-``` text
+## 8. Recommended Execution Order
+
+Run the complete project in this order:
+
+```text
 1. Install requirements
         ↓
 2. notebooks/01-eda.ipynb
         ↓
-3. Verify/create delhi_daily_reindexed.csv
+3. Verify/create DATA/processed/delhi_daily_reindexed.csv
         ↓
 4. notebooks/02-checkpoint1.ipynb
         ↓
-5. Verify checkpoint1_metrics.csv
+5. Verify Phase B checkpoint results
         ↓
-6. Verify checkpoint1_predictions.csv
+6. notebooks/phase_c/02-feature-engineering.ipynb
+        ↓
+7. Verify results/phase_c/delhi_regression_features.csv
+        ↓
+8. notebooks/phase_c/03-regression-models.ipynb
+        ↓
+9. Verify Phase C model comparison and prediction files
+        ↓
+10. Verify Phase C figures
 ```
 
-## 8. Expected Checkpoint 1 Results
+## 9. Expected Phase B Checkpoint 1 Results
 
-A successful reproduction should produce results close to:
+A successful reproduction of Phase B should produce results close to:
 
-``` text
+```text
 Persistence
 MAE  ≈ 19.158
 RMSE ≈ 28.002
@@ -223,15 +282,83 @@ RMSE ≈ 25.451
 R²   ≈ 0.756
 ```
 
-Small differences may occur if the dataset, preprocessing steps, package
-versions, or notebook code are changed.
+Small differences may occur if the dataset, preprocessing steps, package versions, or notebook code are changed.
 
-## 9. Current Scope
+## 10. Phase C Output Verification
 
-This reproducibility guide covers the work currently completed through
-**Phase B — Checkpoint 1**.
+After running the Phase C notebooks, verify that the following files have been generated successfully:
 
-Full rolling/calendar feature engineering, regularized regression
-models, nonlinear regression models, AQI-category classification, and
-final model selection belong to later project stages and are not part of
-this checkpoint.
+```text
+results/phase_c/
+├── PHASE_C_SUMMARY.md
+├── delhi_regression_features.csv
+├── regression_baseline_improvement.csv
+├── regression_coefficients.csv
+├── regression_model_comparison.csv
+├── regression_predictions.csv
+└── figures/
+    ├── actual_vs_predicted_next_day_pm25.png
+    ├── ridge_actual_vs_predicted.png
+    └── ridge_residuals_over_time.png
+```
+
+These outputs provide the regression-ready feature dataset, model comparison results, predictions, coefficients, comparison against the baseline, and visual evaluation of the Phase C regression models.
+
+## 11. Repository Structure
+
+After completing Phase C, the relevant project structure should be:
+
+```text
+AML-2026-P02-Neural_Nomads/
+│
+├── DATA/
+│   ├── raw/
+│   │   └── city_day.csv
+│   └── processed/
+│       └── delhi_daily_reindexed.csv
+│
+├── notebooks/
+│   ├── 01-eda.ipynb
+│   ├── 02-checkpoint1.ipynb
+│   └── phase_c/
+│       ├── 02-feature-engineering.ipynb
+│       └── 03-regression-models.ipynb
+│
+├── results/
+│   ├── figures/
+│   ├── phase-a/
+│   ├── phase-b/
+│   └── phase_c/
+│       ├── PHASE_C_SUMMARY.md
+│       ├── delhi_regression_features.csv
+│       ├── regression_baseline_improvement.csv
+│       ├── regression_coefficients.csv
+│       ├── regression_model_comparison.csv
+│       ├── regression_predictions.csv
+│       └── figures/
+│           ├── actual_vs_predicted_next_day_pm25.png
+│           ├── ridge_actual_vs_predicted.png
+│           └── ridge_residuals_over_time.png
+│
+├── src/
+├── .gitignore
+├── README.md
+├── REPRODUCIBILITY.md
+└── requirements.txt
+```
+
+## 12. Current Scope
+
+This reproducibility guide covers the project work currently completed through:
+
+- **Phase A — EDA and Data Preparation**
+- **Phase B — Checkpoint 1**
+- **Phase C — Feature Engineering and Regression Models**
+
+Phase A establishes the cleaned and processed Delhi air-quality dataset.
+
+Phase B establishes the next-day PM2.5 prediction target, persistence baseline, chronological evaluation procedure, and initial Linear Regression model.
+
+Phase C extends this work with additional feature engineering and regression modelling, along with model comparisons, predictions, coefficient analysis, baseline-improvement analysis, and regression visualisations.
+
+Later project stages, including tasks not yet implemented in the current repository, should be documented here as they are completed.
